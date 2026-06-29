@@ -1,10 +1,11 @@
+#Main app file
+#Author: Ben Lyons
+#Date created: 6/27/2026
+
 import sqlite3
 from flask import Flask, render_template
 
-
-# ------------------------
-# Database establishment
-# ------------------------
+#Database establishment
 connection = sqlite3.connect('dabase.db')
 cursor = connection.cursor()
 cursor.execute('''
@@ -16,22 +17,16 @@ cursor.execute('''
 
 
 
-# Create the Flask application
-
+#Create the Flask application
 app = Flask(__name__)
-# -----------------------------
-# Routes
-# -----------------------------
-
+#- Routes
 @app.route("/")
 def home():
     return "<h1>Swimmer Habit Tracker</h1><p>Your app is running!</p>"
 
-# Later, I'll replace this with:
+#*Later, I'll replace this with:
 # return render_template("dashboard.html")
 
-# -----------------------------
-# Run the app
-# -----------------------------
+#- Run the app
 if __name__ == "__main__":
     app.run(debug=True)
