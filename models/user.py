@@ -5,7 +5,7 @@
 import sqlite3
 import hashlib
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 #Users after they're loaded from the database
 class User:
@@ -26,20 +26,24 @@ def generate_salt():
 
 #Create the new user
 def create_user(username, password):
-    salt = generate_salt()
-    hashed_password = hash_password(password, salt)
-    created_at = datetime.now(datetime.UTC)
+    try:
+        salt = generate_salt()
+        hashed_password = hash_password(password, salt)
+        created_at = datetime.now(timezone.utc).isoformat()
 
-    conn = sqlite3.connect("database.db")
-    cursor = conn.cursor()
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
 
-    cursor.execute("""
-        INSERT INTO users (username, hashed_password, salt, created_at)
-        VALUES (?, ?, ?, ?)
-    """, (username, hashed_password, salt, created_at))
+        cursor.execute("""
+            INSERT INTO users (username, hashed_password, salt, created_at)
+            VALUES (?, ?, ?, ?)
+        """, (username, hashed_password, salt, created_at))
 
-    conn.commit()
-    conn.close()
+        conn.commit()
+        conn.close()
+        return True
+    except sqlite3.IntegrityError:
+        return False
 
 #Verify a login attempt from users
 def verify_user(username, password):

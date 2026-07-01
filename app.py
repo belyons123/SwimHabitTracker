@@ -24,21 +24,20 @@ cursor.execute('''
 #Create the Flask application
 app = Flask(__name__)
 app.secret_key = "chewie"
-
+@app.route("/") #Root where people will first vist, currently only goes to register for test purposes
+def root():
+    return redirect("/register")
 #- Route 1: Register
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
-        create_user(username, password)
+        success = create_user(username, password)
+        if not success:
+            return "Username already exists. Please choose another one"
         return redirect("/login")
-
-    return render_template("register.html")
-
-@app.route("/")
-def home():
-    return "<h1>Swimmer Habit Tracker</h1><p>Your app is running!</p>"
+    return render_template("register.html", error ="Username already exists")
 #- Route 2: Login
 @app.route("/login", methods=["GET","POST"])
 def login():
@@ -50,6 +49,7 @@ def login():
             return redirect("/home")
         else:
             return render_template("login.html")
+    return render_template("login.html")
 #- temporary home page
 @app.route("/home")
 def home():
