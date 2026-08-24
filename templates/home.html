@@ -1,9 +1,10 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Home Page is Working!</title>
-    </head>
-    <body>
-        <p>Here is the body text</p>
-    </body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <div class="card p-4 shadow-sm">
+        <h1 class="mb-3">Welcome to LapLab</h1>
+        <p class="lead">Here is the body text</p>
+    </div>
+{% endblock %}
