@@ -31,37 +31,31 @@ def create_user(username, password):
         hashed_password = hash_password(password, salt)
         created_at = datetime.now(timezone.utc).isoformat()
 
-        conn = sqlite3.connect("database.db")
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            INSERT INTO users (username, hashed_password, salt, created_at)
-            VALUES (?, ?, ?, ?)
-        """, (username, hashed_password, salt, created_at))
-
-        conn.commit()
-        conn.close()
+        with sqlite3.connect("database.db") as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO users (username, hashed_password, salt, created_at)
+                VALUES (?, ?, ?, ?)
+            """, (username, hashed_password, salt, created_at))
         return True
     except sqlite3.IntegrityError:
         return False
 
 #Verify a login attempt from users
 def verify_user(username, password):
-    conn = sqlite3.connect("database.db")
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT id, username, hashed_password, salt FROM users WHERE username = ?", (username,))
-    row = cursor.fetchone()
-    conn.close()
+    username = username.strip()
+    with sqlite3.connect("database.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, username, hashed_password, salt FROM users WHERE username = ?", (username,))
+        row = cursor.fetchone()
 
     if row is None:
         return None  # user not found
 
-    user_id, username, stored_hash, salt = row
-
+    uid, uname, stored_hash, salt = row
     attempted_hash = hash_password(password, salt)
 
     if attempted_hash == stored_hash:
-        return user_id  # login success
+        return uid  # login success
     else:
         return None  # login failed

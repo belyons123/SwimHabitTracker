@@ -18,6 +18,8 @@ cursor.execute('''
         created_at TEXT NOT NULL
     )
 ''')
+connection.commit()
+connection.close()
 
 
 
@@ -31,33 +33,36 @@ def root():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        username = request.form["username"]
+        username = request.form["username"].strip()
         password = request.form["password"]
+        if not username or not password:
+            return render_template("register.html", error="Username and password are required.")
         success = create_user(username, password)
         if not success:
-            return "Username already exists. Please choose another one"
+            return render_template("register.html", error="Username already exists. Please choose another one.")
         return redirect("/login")
-    return render_template("register.html", error ="Username already exists")
+    return render_template("register.html", error=None)
+
 #- Route 2: Login
 @app.route("/login", methods=["GET","POST"])
 def login():
     if request.method == "POST":
-        username = request.form["username"]
+        username = request.form["username"].strip()   # trim here too
         password = request.form["password"]
-        user_id = verify_user(username,password)
+        if not username or not password:
+            return render_template("login.html", error="Username and password are required.")
+        user_id = verify_user(username, password)
         if user_id:
+            session['user_id'] = user_id
             return redirect("/home")
         else:
-            return render_template("login.html")
-    return render_template("login.html")
+            return render_template("login.html", error="Invalid username or password.")
+    return render_template("login.html", error=None)
+
 #- temporary home page
 @app.route("/home")
 def home():
     return render_template('home.html')
-
-
-#*Later, I'll replace this with:
-# return render_template("dashboard.html")
 
 #- Run the app
 if __name__ == "__main__":
