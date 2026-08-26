@@ -18,6 +18,15 @@ cursor.execute('''
         created_at TEXT NOT NULL
     )
 ''')
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS videos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        stroke TEXT NOT NULL,
+        description TEXT,
+        file_path TEXT NOT NULL
+    )
+''')
 connection.commit()
 connection.close()
 
