@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Video Library{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Technique Video Library</h1>
+
+<!-- Stroke Filter -->
+<form method="GET" class="mb-3">
+    <select name="stroke" class="form-select" onchange="this.form.submit()">
+        <option value="">All Strokes</option>
+        <option value="Freestyle">Freestyle</option>
+        <option value="Backstroke">Backstroke</option>
+        <option value="Breaststroke">Breaststroke</option>
+        <option value="Butterfly">Butterfly</option>
+    </select>
+</form>
+
+<div class="row">
+    {% for v in videos %}
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">{{ v[1] }}</h5>
+                <p class="card-text">{{ v[2] }}</p>
+                <a href="/videos/{{ v[0] }}" class="btn btn-primary">Watch</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Video Detail{% endblock %}
+
+{% block content %}
+<h1 class="mb-3">{{ video[1] }}</h1>
+<p class="text-muted">{{ video[2] }}</p>
+<p>{{ video[3] }}</p>
+
+<video controls width="100%" class="shadow-sm">
+    <source src="{{ url_for('static', filename=video[4]) }}" type="video/mp4">
+</video>
+
+{% endblock %}
