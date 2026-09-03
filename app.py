@@ -3,9 +3,12 @@
 #Date created: 6/27/2026
 
 import sqlite3
+import os
+from werkzeug.utils import secure_filename
 from flask import Flask, render_template, request, redirect, session
-from models.user import create_user, verify_user
+from models.user import create_user, verify_user, get_username
 from models.videos import get_all_videos, get_video
+from models.user_videos import save_user_video, get_user_videos
 
 #Database establishment
 connection = sqlite3.connect("database.db")
@@ -26,6 +29,15 @@ cursor.execute('''
         stroke TEXT NOT NULL,
         description TEXT,
         file_path TEXT NOT NULL
+    )
+''')
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS user_videos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        file_path TEXT NOT NULL,
+        upload_date TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id)
     )
 ''')
 connection.commit()
@@ -72,7 +84,11 @@ def login():
 #Home Page
 @app.route("/home")
 def home():
-    return render_template('home.html')
+    if "user_id" not in session:
+        return redirect("/login")
+
+    username = get_username(session["user_id"])
+    return render_template("home.html", username=username)
 
 #LargerVideo Library
 @app.route("/videos")
@@ -93,6 +109,64 @@ def video_detail(video_id):
 
     video = get_video(video_id)
     return render_template("video_detail.html", video=video)
+
+#User video upload
+UPLOAD_FOLDER = "static/uploads"
+ALLOWED_EXTENSIONS = {"mp4", "mov"}
+
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route("/upload_video", methods=["GET", "POST"])
+def upload_video():
+    if "user_id" not in session:
+        return redirect("/login")
+
+    if request.method == "POST":
+        file = request.files.get("video")
+
+        if not file or file.filename == "":
+            return render_template("upload_video.html", error="Please select a file.")
+
+        if not allowed_file(file.filename):
+            return render_template("upload_video.html", error="Only MP4 or MOV files allowed.")
+
+        filename = secure_filename(file.filename)
+        save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        file.save(save_path)
+
+        save_user_video(session["user_id"], f"uploads/{filename}")
+
+        return redirect("/compare_select")
+
+    return render_template("upload_video.html", error=None)
+
+#Video Comparison Selection
+@app.route("/compare_select")
+def compare_select():
+    if "user_id" not in session:
+        return redirect("/login")
+
+    user_videos = get_user_videos(session["user_id"])
+    pro_videos = get_all_videos()  # from Phase 6
+
+    return render_template("compare_select.html", user_videos=user_videos, pro_videos=pro_videos)
+
+#Side-by-Side Video Comparer
+@app.route("/compare_viewer")
+def compare_viewer():
+    if "user_id" not in session:
+        return redirect("/login")
+
+    user_vid = request.args.get("user_vid")
+    pro_vid = request.args.get("pro_vid")
+
+    user_video = get_user_videos(user_vid)
+    pro_video = get_video(pro_vid)
+
+    return render_template("compare_viewer.html", user_video=user_video, pro_video=pro_video)
 
 #- Run the app
 if __name__ == "__main__":

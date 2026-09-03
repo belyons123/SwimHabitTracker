@@ -59,3 +59,12 @@ def verify_user(username, password):
         return uid  # login success
     else:
         return None  # login failed
+
+#GetUsername for homescreen
+def get_username(user_id):
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT username FROM users WHERE id = ?", (user_id,))
+    result = cursor.fetchone()
+    conn.close()
+    return result[0] if result else None

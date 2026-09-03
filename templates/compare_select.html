@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Compare Videos{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Choose Videos to Compare</h1>
+
+<form method="GET" action="/compare_viewer">
+    <div class="mb-3">
+        <label class="form-label">Your Video</label>
+        <select name="user_vid" class="form-select" required>
+            {% for v in user_videos %}
+            <option value="{{ v[0] }}">{{ v[2] }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Professional Video</label>
+        <select name="pro_vid" class="form-select" required>
+            {% for v in pro_videos %}
+            <option value="{{ v[0] }}">{{ v[1] }} ({{ v[2] }})</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <button class="btn btn-primary">Compare</button>
+</form>
+{% endblock %}
