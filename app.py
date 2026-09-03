@@ -8,7 +8,7 @@ from werkzeug.utils import secure_filename
 from flask import Flask, render_template, request, redirect, session
 from models.user import create_user, verify_user, get_username
 from models.videos import get_all_videos, get_video
-from models.user_videos import save_user_video, get_user_videos
+from models.user_videos import save_user_video, get_user_videos, get_user_video
 
 #Database establishment
 connection = sqlite3.connect("database.db")
@@ -113,6 +113,7 @@ def video_detail(video_id):
 #User video upload
 UPLOAD_FOLDER = "static/uploads"
 ALLOWED_EXTENSIONS = {"mp4", "mov"}
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
@@ -163,7 +164,7 @@ def compare_viewer():
     user_vid = request.args.get("user_vid")
     pro_vid = request.args.get("pro_vid")
 
-    user_video = get_user_videos(user_vid)
+    user_video = get_user_video(user_vid)
     pro_video = get_video(pro_vid)
 
     return render_template("compare_viewer.html", user_video=user_video, pro_video=pro_video)

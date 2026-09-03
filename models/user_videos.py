@@ -18,3 +18,11 @@ def get_user_videos(user_id):
     videos = cursor.fetchall()
     conn.close()
     return videos
+
+def get_user_video(video_id):
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM user_videos WHERE id = ?", (video_id,))
+    video = cursor.fetchone()
+    conn.close()
+    return video
